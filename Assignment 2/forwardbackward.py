@@ -23,7 +23,7 @@ def filtering(T, O, ev):
     # Computing equation 15.12 for all time steps
     for i in range(t):
         f.append(forward(T, O, f[i], ev[i]))
-        #print("Forward message ", i, ":", f[i])
+        #print("Forward message ", i + 1, ":", f[i + 1])
 
     return f
 
@@ -44,8 +44,9 @@ def smoothing(T, O, ev):
     for i in range(t - 1, -1, -1):
         s.append(normalize(np.multiply(f[i + 1], b)))
         b = backward(T, O, b, ev[i])
-        #print("Backward message ", i, ": ", b)
+        #print("Backward message ", i + 1, ": ", b)
 
+    #print("Smoothing: ", s[0])
     return s
 
 
