@@ -1,4 +1,5 @@
 from typing import List, Any, NamedTuple, Dict, Tuple
+import numpy as np
 
 # Key = State, Value = Reward
 reward_matrix: Dict[int, float] = {0: -0.1, 1: -0.1, 2: -0.1, 3: -0.1, 4: -0.1, 5: -1.0, 6: -0.1, 7: -1.0, 8: -0.1,
@@ -116,6 +117,22 @@ class Constants(NamedTuple):
 # This variable contains all constants you will need
 constants: Constants = Constants()
 
+def value_action(state: int, value_array) -> float:
+    """
+    Finding the value of all actions given the current state and current value
+
+    :param state: The current state which is a number between 0-15 as there are 16 states (16 tiles)
+    :param value_array: A value array.
+    :return: Value of actions.
+    """
+    A = np.zeros(constants.number_actions)
+
+    for action in moves:
+
+        for outcome_state in get_outcome_states(state, action):
+            A[moves[action]] += get_transition_probability(state, action, outcome_state) * value_array[outcome_state]
+
+    return A
 
 def value_iteration() -> Any:
     """
@@ -128,12 +145,42 @@ def value_iteration() -> Any:
     """
     # Access all states, actions, rewards, constants through functions and class Constants
 
-    # Initialize initial values
+    # Arrays for keeping values of states, current state V_k and future state V_kp
+    V_k = np.zeros(constants.number_states, float)
+    V_kp = np.zeros(constants.number_states, float)
 
-    # while loop until step is smaller than epsilon
-    # for each state do update function
+    while True:
+        delta = 0
 
-    # return value table
+        # Iterating over all possible states
+        for state in range(constants.number_states):
+
+            # Calculating the value of each action based on state and previous value and returning the max action value
+            A_max = np.max(value_action(state, V_k))
+
+            # Getting the reward for given state
+            R = get_reward(state)
+
+            # Updating value list
+            V_kp[state] = R + constants.gamma * A_max
+
+            delta = max(delta, np.abs(V_kp[state] - V_k[state]))
+
+        if (delta < constants.epsilon*(1 - constants.gamma)/constants.gamma):
+            break
+
+        # Updating current value list
+        V_k = V_kp
+
+    return V_kp
+
+
+def print_table(cols: int, rows: int, value_table: Any):
+    """
+    Helping function for printing a numpy array nicely.
+    """
+    print(np.reshape(value_table, (cols, rows)))
+
 
 
 def extract_policy(value_table: Any) -> Any:
@@ -142,7 +189,14 @@ def extract_policy(value_table: Any) -> Any:
     :param value_table: Some data structure containing the converged utility values.
     :return: The extracted policy.
     """
-    # TODO: Implement the method.
+    P = np.zeros(constants.number_states, float)
+
+    for state in range(constants.number_states):
+        P[state] = np.argmax(value_action(state, value_table))
+        print("(state: {}, action: {})".format(state, list(moves.keys())[list(moves.values()).index(P[state])]))
+
+    return P
+
 
 
 def main() -> None:
@@ -152,7 +206,6 @@ def main() -> None:
     """
     value_table = value_iteration()
     optimal_policy = extract_policy(value_table)
-
 
 if __name__ == '__main__':
     main()
