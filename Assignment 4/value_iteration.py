@@ -126,7 +126,14 @@ def value_iteration() -> Any:
 
     :return: The converged utility values of all states.
     """
-    # TODO: Implement the method.
+    # Access all states, actions, rewards, constants through functions and class Constants
+
+    # Initialize initial values
+
+    # while loop until step is smaller than epsilon
+    # for each state do update function
+
+    # return value table
 
 
 def extract_policy(value_table: Any) -> Any:
